@@ -24,8 +24,9 @@ class MainActivity : AppCompatActivity()
         //  Setup toolbar:
         setSupportActionBar(my_toolbar)
 
+        //  Linear layout, since I want the recyclerview to function like a listview:
         viewManager = LinearLayoutManager(this)
-        //viewAdapter = actionBar
+        viewAdapter = Repository_Adapter()
 
         recyclerView  = findViewById<RecyclerView>(R.id.recyclerView).apply {
             setHasFixedSize(true)

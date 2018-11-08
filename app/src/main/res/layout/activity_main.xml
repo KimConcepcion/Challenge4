@@ -8,15 +8,23 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Include the toolbar -->
-    <include layout="@layout/toolbar"/>
+    <!-- Linear layout is used to place views beneath the toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <!-- Recyclerview -->
+        <!-- Include the toolbar -->
+        <include layout="@layout/toolbar"/>
+
+        <!-- Recyclerview -->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:scrollbars="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
+        
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
