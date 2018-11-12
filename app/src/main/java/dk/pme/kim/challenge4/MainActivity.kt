@@ -16,6 +16,18 @@ class MainActivity : AppCompatActivity()
     private lateinit var viewAdapter : RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
+    fun vRecycler_init(aList : ArrayList<Repository>){
+        //  Linear layout, since I want the recyclerview to function like a listview:
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = Repository_Adapter(aList, applicationContext)
+
+
+        recyclerView  = findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.setHasFixedSize(false)
+        recyclerView.layoutManager = viewManager
+        recyclerView.adapter = viewAdapter
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -24,30 +36,11 @@ class MainActivity : AppCompatActivity()
         //  Setup toolbar:
         setSupportActionBar(my_toolbar)
 
-        //  Linear layout, since I want the recyclerview to function like a listview:
-        viewManager = LinearLayoutManager(this)
-        viewAdapter = Repository_Adapter()
+        //  Test list:
+        val testList = ArrayList<Repository>()
+        testList.add(Repository("First", "Kim", "", 3))
+        testList.add(Repository("Second", "Frank", "", 5))
 
-        recyclerView  = findViewById<RecyclerView>(R.id.recyclerView).apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-
-        //  First we should inflate the empty menu with the menu xml file:
-        menuInflater.inflate(R.menu.search_menu, menu)
-
-        //  Find id of views in menu - searchbar:
-        val searchItem = menu?.findItem(R.id.search_bar)
-
-        if(searchItem != null)
-        {
-            val searchView = searchItem.actionView as SearchView
-        }
-
-        return super.onCreateOptionsMenu(menu)
+        vRecycler_init(testList)
     }
 }
