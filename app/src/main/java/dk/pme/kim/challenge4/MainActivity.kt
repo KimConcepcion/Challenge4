@@ -10,22 +10,25 @@ import android.view.Menu
 import android.view.ViewManager
 import android.widget.LinearLayout
 import android.support.v7.widget.SearchView
+import android.util.Log
 import android.view.Gravity
 import android.widget.Toast
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.toolbar.*
+import okhttp3.*
+import java.io.IOException
 
 class MainActivity : AppCompatActivity()
 {
-    private lateinit var recyclerView : RecyclerView
-    private lateinit var viewAdapter : RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-
     //  Initialize recyclerview:
-    fun vRecycler_init(aList : ArrayList<Repository>){
+    fun vRecycler_init(repos : Repos){
+        lateinit var recyclerView : RecyclerView
+        lateinit var viewAdapter : RecyclerView.Adapter<*>
+        lateinit var viewManager: RecyclerView.LayoutManager
 
         //  Linear layout, since I want the recyclerview to function like a listview:
         viewManager = LinearLayoutManager(this)
-        viewAdapter = Repository_Adapter(aList, applicationContext)
+        viewAdapter = Repository_Adapter(repos, applicationContext)
 
         recyclerView  = findViewById<RecyclerView>(R.id.recyclerView)
         recyclerView.setHasFixedSize(false)
@@ -33,6 +36,64 @@ class MainActivity : AppCompatActivity()
         recyclerView.adapter = viewAdapter
     }
 
+    fun urlBuilder(query : String) : String{
+        val urlBuilder = HttpUrl.Builder()
+                .scheme("https")
+                .host("api.github.com")
+                .addPathSegment("repos")
+                .addPathSegment("KimConcepcion")
+                .addPathSegment(query)
+
+        //  Build the url as a string and return it:
+        val url : String = urlBuilder?.build().toString()
+        Log.i("MainActivity", "Created URL:" + url + "\n")
+        return url
+    }
+    
+    //  Consider adding another querry to the url specifying the repo:
+    //  https://api.github.com/repos/KimConcepcion/<REPO HERE>
+    fun getBody(url : String){
+        val client = OkHttpClient()
+        val request = Request.Builder()
+                .url(url)
+                .build()
+
+        client.newCall(request).enqueue(object : Callback{
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                if(response.isSuccessful){
+
+                    Log.i("MainActivity", "Received response!")
+                    val body = response.body()?.string().toString()
+
+                    //  Parse body respons:
+                    val gson = Gson()
+                    val repo = gson.fromJson(body, Repo::class.java)
+
+                    //  Also log the results:
+                    Log.i("MainActivity", "Name:" + repo.name + "\n")
+                    Log.i("MainActivity", "Owner:" + repo.owner.login + "\n")
+                    Log.i("MainActivity", "Updated at:" + repo.updated_at + "\n")
+                    Log.i("MainActivity", "Html_url:" + repo.html_url + "\n")
+                    Log.i("MainActivity", "Stars:" + repo.stargazers_count.toString() + "\n")
+
+                    //  Run stuff on main thread:
+                    this@MainActivity.runOnUiThread(java.lang.Runnable {
+                        val list = ArrayList<Repo>()
+                        list.add( Repo(repo.name, repo.owner, repo.html_url, repo.updated_at, repo.stargazers_count) )
+
+                        val repos = Repos(list)
+                        vRecycler_init(repos)
+                    })
+                }
+            }
+        })
+    }
+
+    //  Inflate menu with search menu and setup API with search calls:
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.search_menu, menu)
         val srchItem = menu?.findItem(R.id.search_bar)
@@ -40,16 +101,17 @@ class MainActivity : AppCompatActivity()
         if(srchItem != null){
             val srchView = srchItem.actionView as SearchView
             srchView.layoutParams = ActionBar.LayoutParams(Gravity.RIGHT)
-            srchView.queryHint = "Search repository here..."
+            srchView.queryHint = "Search GitHub Repositories"
 
             srchView.isIconified = false
             srchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
                 override fun onQueryTextSubmit(query: String?): Boolean {
-                    //  Call API here
 
                     //  If query(your search is not empty)
                     if(query != null){
+                        //  Use query to search for specific repo:PRO
+                        getBody(urlBuilder(query))
                         Toast.makeText(baseContext, query, Toast.LENGTH_SHORT).show()
                     }
                     return false
@@ -60,7 +122,6 @@ class MainActivity : AppCompatActivity()
                 }
             })
         }
-
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -72,11 +133,7 @@ class MainActivity : AppCompatActivity()
         setSupportActionBar(my_toolbar) //  Setup toolbar to main activity
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        //  Test list:
-        val testList = ArrayList<Repository>()
-        testList.add(Repository("First", "Kim", "", 3))
-        testList.add(Repository("Second", "Frank", "", 5))
-
-        vRecycler_init(testList)
+        //getBody("https://api.github.com/repos/KimConcepcion/PRO5")
+        //getBody(urlBuilder("AdapterViews"))
     }
 }

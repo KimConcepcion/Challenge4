@@ -18,8 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class Repository_Adapter(private val repos : ArrayList<Repository>, private val mcontext : Context)
-    : RecyclerView.Adapter<Repository_Adapter.MyViewHolder>()
+class Repository_Adapter(val repos : Repos, val context : Context) : RecyclerView.Adapter<Repository_Adapter.MyViewHolder>()
 {
     class MyViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView)
     {
@@ -49,31 +48,25 @@ class Repository_Adapter(private val repos : ArrayList<Repository>, private val 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
 
         Log.d("Repository_Adapter", "onBindViewHolder: Called!")
-
-        val repo = repos[position]
-
-        //  Get timestamp:
-        val current = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        repo.date = current.format(formatter)
+        val repo = repos.reposList[position]
 
         //  update views:
         holder.txtName?.text = repo.name
-        holder.txtDate?.text = repo.date
-        holder.txtOwner?.text = repo.owner
-        holder.txtStars?.text = repo.stars.toString()
+        holder.txtDate?.text = repo.updated_at
+        holder.txtOwner?.text = repo.owner.login
+        holder.txtStars?.text = repo.stargazers_count.toString()
 
         //  Click listener:
         holder.parentLayout?.setOnClickListener(View.OnClickListener {
-            val intent : Intent = Intent(mcontext, GitHubInfoActivity::class.java)
+            val intent : Intent = Intent(context, GitHubInfoActivity::class.java)
             intent.putExtra("extra_name", repo.name)
-            intent.putExtra("extra_date", repo.date)
-            intent.putExtra("extra_owner", repo.owner)
-            intent.putExtra("extra_stars", repo.stars.toString())
-            mcontext.startActivity(intent)
+            intent.putExtra("extra_date", repo.updated_at)
+            intent.putExtra("extra_owner", repo.owner.login)
+            intent.putExtra("extra_stars", repo.stargazers_count.toString())
+            context.startActivity(intent)
         })
     }
 
     //  Gets the amount of repositories in the list:
-    override fun getItemCount(): Int = repos.size
+    override fun getItemCount(): Int = repos.reposList.size
 }
