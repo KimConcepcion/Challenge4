@@ -3,6 +3,7 @@ package dk.pme.kim.challenge4
 import android.content.Context
 import android.content.Intent
 import android.nfc.Tag
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,7 +23,7 @@ class Repository_Adapter(val repos : Repos, val context : Context) : RecyclerVie
 {
     class MyViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView)
     {
-        var parentLayout : RelativeLayout? = null
+        var parentLayout : CardView? = null
         var txtName : TextView? = null
         var txtDate : TextView? = null
         var txtOwner : TextView? = null
@@ -30,7 +31,7 @@ class Repository_Adapter(val repos : Repos, val context : Context) : RecyclerVie
 
         init
         {
-            this.parentLayout = itemView.findViewById<RelativeLayout>(R.id.parentLayout)
+            this.parentLayout = itemView.findViewById<CardView>(R.id.parentLayout)
             this.txtName = itemView.findViewById<TextView>(R.id.txtName)
             this.txtDate = itemView.findViewById<TextView>(R.id.txtDate)
             this.txtOwner = itemView.findViewById<TextView>(R.id.txtOwner)
@@ -62,11 +63,15 @@ class Repository_Adapter(val repos : Repos, val context : Context) : RecyclerVie
             intent.putExtra("extra_name", repo.name)
             intent.putExtra("extra_date", repo.updated_at)
             intent.putExtra("extra_owner", repo.owner.login)
+            intent.putExtra("extra_html_url", repo.html_url)
             intent.putExtra("extra_stars", repo.stargazers_count.toString())
             context.startActivity(intent)
         })
     }
 
-    //  Gets the amount of repositories in the list:
-    override fun getItemCount(): Int = repos.reposList.size
+    override fun getItemCount(): Int{
+        return repos.reposList.size
+    }
+
+
 }

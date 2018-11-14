@@ -17,15 +17,19 @@ import com.google.gson.Gson
 import kotlinx.android.synthetic.main.toolbar.*
 import okhttp3.*
 import java.io.IOException
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class MainActivity : AppCompatActivity()
 {
+    private val list = ArrayList<Repo>()
+    private var repos = Repos(list)
+    private lateinit var recyclerView : RecyclerView
+    private lateinit var viewAdapter : RecyclerView.Adapter<*>
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
     //  Initialize recyclerview:
     fun vRecycler_init(repos : Repos){
-        lateinit var recyclerView : RecyclerView
-        lateinit var viewAdapter : RecyclerView.Adapter<*>
-        lateinit var viewManager: RecyclerView.LayoutManager
-
         //  Linear layout, since I want the recyclerview to function like a listview:
         viewManager = LinearLayoutManager(this)
         viewAdapter = Repository_Adapter(repos, applicationContext)
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity()
         recyclerView.setHasFixedSize(false)
         recyclerView.layoutManager = viewManager
         recyclerView.adapter = viewAdapter
+        Log.d("MainActivity", "Recyclerview initialized!")
     }
 
     fun urlBuilder(query : String) : String{
@@ -49,7 +54,7 @@ class MainActivity : AppCompatActivity()
         Log.i("MainActivity", "Created URL:" + url + "\n")
         return url
     }
-    
+
     //  Consider adding another querry to the url specifying the repo:
     //  https://api.github.com/repos/KimConcepcion/<REPO HERE>
     fun getBody(url : String){
@@ -80,13 +85,16 @@ class MainActivity : AppCompatActivity()
                     Log.i("MainActivity", "Html_url:" + repo.html_url + "\n")
                     Log.i("MainActivity", "Stars:" + repo.stargazers_count.toString() + "\n")
 
+                    //  Modify updated at value:
+                    //val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    //repo.updated_at = LocalDate.parse(repo.updated_at, formatter).toString()
+
+                    list.add( Repo(repo.name, repo.owner, repo.html_url, repo.updated_at, repo.stargazers_count) )
+                    Log.d("MainActivity", "List has been updated!")
+
                     //  Run stuff on main thread:
                     this@MainActivity.runOnUiThread(java.lang.Runnable {
-                        val list = ArrayList<Repo>()
-                        list.add( Repo(repo.name, repo.owner, repo.html_url, repo.updated_at, repo.stargazers_count) )
-
-                        val repos = Repos(list)
-                        vRecycler_init(repos)
+                        viewAdapter.notifyDataSetChanged()
                     })
                 }
             }
@@ -108,9 +116,9 @@ class MainActivity : AppCompatActivity()
 
                 override fun onQueryTextSubmit(query: String?): Boolean {
 
-                    //  If query(your search is not empty)
                     if(query != null){
                         //  Use query to search for specific repo:PRO
+                        Log.d("SearchBar", "Query:" + query)
                         getBody(urlBuilder(query))
                         Toast.makeText(baseContext, query, Toast.LENGTH_SHORT).show()
                     }
@@ -133,7 +141,7 @@ class MainActivity : AppCompatActivity()
         setSupportActionBar(my_toolbar) //  Setup toolbar to main activity
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        //getBody("https://api.github.com/repos/KimConcepcion/PRO5")
-        //getBody(urlBuilder("AdapterViews"))
+        //  Initialize recyclerview:
+        vRecycler_init(repos)
     }
 }

@@ -17,6 +17,15 @@
         <!-- Include the toolbar -->
         <include layout="@layout/toolbar"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textColor="#000"
+            android:textStyle="bold"
+            android:text="Searching History"/>
+
         <!-- Recyclerview -->
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
