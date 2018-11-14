@@ -24,6 +24,7 @@ class GitHubInfoActivity : AppCompatActivity() {
         getFromIntent()
     }
 
+    //Test
     //  Receive from intent:
     private fun getFromIntent(){
         if(
